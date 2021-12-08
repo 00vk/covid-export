@@ -27,6 +27,7 @@ import java.util.Map;
 @EnableScheduling
 public class CheckStatusService {
 
+    public static final int STATUSES_LIMIT = 500;
     private final ServiceConfig config;
     private final AuthService authService;
     private final SaveExportStatusService statusService;
@@ -62,6 +63,7 @@ public class CheckStatusService {
         logger.info("Найдено новых статусов: " + count);
         if (count == 0)
             return;
+        count = Math.min(count, STATUSES_LIMIT); // ограничение API
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         Map<String, Object> requestBody = checkStatusRequest();

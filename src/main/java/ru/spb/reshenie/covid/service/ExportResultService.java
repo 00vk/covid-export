@@ -63,7 +63,6 @@ public class ExportResultService {
         if (covidResultData.isEmpty())
             return;
         CovidRequest request = formatter.createRequest(covidResultData, token);
-        //        CovidRequest request = formatter.createRequest(token);
         sendCovidResultRequest(request, "ext-orders-package");
     }
 
