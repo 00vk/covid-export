@@ -59,7 +59,9 @@ public class ExportResultService {
         if (token == null)
             return;
 
+        logger.info("Поиск новых результатов для отправки...");
         List<CovidResultDataView> covidResultData = repository.findFirstFiftyRecords();
+        logger.info("Найдено новых результатов: " + covidResultData.size());
         if (covidResultData.isEmpty())
             return;
         CovidRequest request = formatter.createRequest(covidResultData, token);
@@ -83,7 +85,6 @@ public class ExportResultService {
         HttpEntity<Object> entity = new HttpEntity<>(request, headers);
         URI uri = getUri(uriPath);
         logger.info("Отправка результатов исследований " + request.orderNumbers() + "...");
-        logger.debug("Sending request: " + request);
         ResponseEntity<Map> response = template.exchange(uri, HttpMethod.POST, entity, Map.class);
         logger.debug("Response: " + response);
         saveExportStatus(response);

@@ -27,7 +27,6 @@ import java.util.Map;
 @EnableScheduling
 public class CheckStatusService {
 
-    public static final int STATUSES_LIMIT = 500;
     private final ServiceConfig config;
     private final AuthService authService;
     private final SaveExportStatusService statusService;
@@ -44,52 +43,26 @@ public class CheckStatusService {
     }
 
     @Scheduled(cron = "${import.status.schedule}") // 10min
-    public void statusCount() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        Map<String, Object> requestBody = checkStatusRequest();
-        HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
-        URI uri = getUri("status-count");
-        logger.info("Проверка новых статусов...");
-        logger.debug(entity.toString());
-        ResponseEntity<Map> response = template.exchange(uri, HttpMethod.POST, entity, Map.class);
-        logger.debug(response.toString());
-        Map<String, Object> body = response.getBody();
-        checkNewStatuses(body);
-    }
-
-    private void checkNewStatuses(Map<String, Object> responseBody) {
-        Integer count = (Integer) ((Map<String, Object>) responseBody.get("body")).get("count");
-        logger.info("Найдено новых статусов: " + count);
-        if (count == 0)
-            return;
-        count = Math.min(count, STATUSES_LIMIT); // ограничение API
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        Map<String, Object> requestBody = checkStatusRequest();
-        requestBody.put("count", count);
-        HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
-        URI uri = getUri("new-status");
-        logger.info("Получение новых статусов...");
-        logger.debug(entity.toString());
-        ResponseEntity<Map> response = template.exchange(uri, HttpMethod.POST, entity, Map.class);
-        logger.debug(response.toString());
-        saveGosuslugiStatus(response);
+    public void checkStatuses() {
+        List<String[]> ordersGroupedByFifty = statusService.queryOrdersToCheckStatus();
+        for (String[] orders : ordersGroupedByFifty) {
+            checkStatusesByOrderNumber(orders);
+        }
     }
 
     public void checkStatusesByOrderNumber(String... orderNumbers) {
         if (orderNumbers.length == 0)
             return;
+        List<String> orders = Arrays.asList(orderNumbers);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         Map<String, Object> requestBody = checkStatusRequest();
-        requestBody.put("orders", orderNumbers);
+        requestBody.put("orders", orders);
         HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
         URI uri = getUri("status-by-orders");
-        logger.info("Получение статуса по заказам: " + Arrays.toString(orderNumbers) + "...");
-        logger.debug(entity.toString());
+        logger.info("Получение статуса по заказам: " + orders + "...");
         ResponseEntity<Map> response = template.exchange(uri, HttpMethod.POST, entity, Map.class);
-        logger.debug(response.toString());
+        logger.debug("Response: " + response);
         saveGosuslugiStatus(response);
     }
 

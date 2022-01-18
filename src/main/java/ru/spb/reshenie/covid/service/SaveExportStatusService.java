@@ -6,6 +6,11 @@ import org.springframework.stereotype.Service;
 import ru.spb.reshenie.covid.entity.ExportStatus;
 import ru.spb.reshenie.covid.repository.ExportStatusRepository;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by vkondratiev on 08.11.2021
  */
@@ -17,6 +22,33 @@ public class SaveExportStatusService {
 
     public SaveExportStatusService(ExportStatusRepository repository) {
         this.repository = repository;
+    }
+
+    public List<String[]> queryOrdersToCheckStatus() {
+        LocalDateTime dateFrom = LocalDateTime.now().minusDays(2);
+        LocalDateTime dateTo = LocalDateTime.now().minusHours(6);
+        List<ExportStatus> records = repository.findRecordsToCheckStatus(dateFrom, dateTo);
+        int size = records.size();
+        logger.info("Найдено заказов для проверки статуса: " + size);
+        if (size == 0)
+            return new ArrayList<>();
+
+        String[] orderNum = new String[size];
+        for (int i = 0; i < size; i++) {
+            ExportStatus record = records.get(i);
+            record.updateDate();
+            repository.save(record);
+            orderNum[i] = record.getOrderNumber();
+        }
+
+        List<String[]> groupedByFifty = new ArrayList<>();
+        int idx = 0;
+        while (idx < orderNum.length) {
+            int end = Math.min(idx + 50, orderNum.length);
+            groupedByFifty.add(Arrays.copyOfRange(orderNum, idx, end));
+            idx += end;
+        }
+        return groupedByFifty;
     }
 
     public void saveExportStatus(String orderNumber,

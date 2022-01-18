@@ -47,7 +47,6 @@ public class AuthService {
         ResponseEntity<Map> response;
         logger.info("Выполняется авторизация...");
         try {
-            logger.debug("Sending request: " + entity);
             response = template.exchange(uri, HttpMethod.POST, entity, Map.class);
         } catch (RestClientException e) {
             logger.error("Не удалось получить токен", e);
