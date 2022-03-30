@@ -6,7 +6,7 @@
 
     <script>
             async function checkStatus(num) {
-                let response = await fetch('/check-status?order=' + num);
+                let response = await fetch('/covid-export/check-status?order=' + num);
 
                 if (response.ok) {
                     let text = await response.text();
@@ -18,7 +18,7 @@
             }
 
             async function reExport(num) {
-                let response = await fetch('/re-export?order=' + num);
+                let response = await fetch('/covid-export/re-export?order=' + num);
 
                 if (response.ok) {
                     let text = await response.text();
@@ -102,7 +102,7 @@
 </head>
 <body>
  <div th:each="date : ${datesAndStatuses}">
-    <details open>
+    <details>
         <summary>
             <span th:text="${date.key}">Дата готовности результата</span></summary>
         <table>

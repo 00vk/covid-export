@@ -115,10 +115,13 @@ public class CovidResultMapper {
     }
 
     private RegAddress getRegAddress(CovidResultDataView covidResultDataView) {
+        String region = covidResultDataView.getRegRegion();
+        if (region == null || region.isEmpty())
+            region = config.defaultRegion();
         return new RegAddress(
                 covidResultDataView.getRegTown(),
                 covidResultDataView.getRegHouse(),
-                covidResultDataView.getRegRegion(),
+                region,
                 covidResultDataView.getRegBuilding(),
                 covidResultDataView.getRegDistrict(),
                 covidResultDataView.getRegApt(),

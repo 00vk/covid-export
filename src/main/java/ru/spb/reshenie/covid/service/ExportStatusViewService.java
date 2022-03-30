@@ -6,7 +6,6 @@ import ru.spb.reshenie.covid.entity.ExportStatusView;
 import ru.spb.reshenie.covid.repository.ExportStatusViewRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -24,9 +23,9 @@ public class ExportStatusViewService {
 
     public List<ExportStatusView> findLastTwoWeeks() {
         LocalDate now = LocalDate.now();
-        LocalDateTime start = now.plusDays(-14).atStartOfDay();
-        LocalDateTime end = now.plusDays(1).atStartOfDay();
-        return repository.findByStatusDateBetween(start, end);
+        LocalDate start = now.plusDays(-14);
+        LocalDate end = now.plusDays(1);
+        return repository.findByReadyDateBetween(start, end);
     }
 
 }

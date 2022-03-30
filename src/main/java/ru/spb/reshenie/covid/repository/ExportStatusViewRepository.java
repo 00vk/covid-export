@@ -6,7 +6,6 @@ import ru.spb.reshenie.covid.entity.ExportStatusView;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -18,9 +17,9 @@ public interface ExportStatusViewRepository extends JpaRepository<ExportStatusVi
 
     default List<ExportStatusView> findByStatusDate(LocalDate date) {
         List<ExportStatusView> byStatusDateBetween;
-        byStatusDateBetween = findByStatusDateBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+        byStatusDateBetween = findByReadyDateBetween(date, date.plusDays(1));
         return byStatusDateBetween;
     }
 
-    List<ExportStatusView> findByStatusDateBetween(LocalDateTime from, LocalDateTime to);
+    List<ExportStatusView> findByReadyDateBetween(LocalDate from, LocalDate to);
 }
